@@ -67,24 +67,27 @@ export class ConfigUtil {
         this.log.set(name, [])
       }
       const log = this.log.get(name)
-      log.push(data)
+      log.push(data.toString())
     })
 
     ls.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`)
+      console.log("%c Line:74 🍧 data", "color:#3f7cff", data);
     })
 
     ls.on('close', (code) => {
       config.active = false
+      this.cache.delete(name) // Add this line
       this.syncConfig()
       console.log(`child process exited with code ${code}`)
     })
   }
 
   stop(name: string) {
+    console.log("%c Line:86 🍢 name", "color:#4fff4B", name);
     const ls = this.cache.get(name)
     if (ls) {
       const res = ls.kill()
+      console.log("%c Line:89 🥝 res", "color:#93c0a4", res);
       if (res) {
         const config = this.getConfig(name)
         config.active = false

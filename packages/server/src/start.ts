@@ -38,4 +38,13 @@ export const monitor = (router: Router) => {
     console.log("%c Line:38 🍒 ctx", "color:#ffdd4d", ctx);
     ctx.body = configUtil.remove(ctx.request.body.name)
   })
+
+  router.get('/log/:name', (ctx) => {
+    const name = ctx.params.name
+    const log = configUtil.log.get(name) || []
+    ctx.body = {
+      code: 200,
+      data: log,
+    }
+  })
 }

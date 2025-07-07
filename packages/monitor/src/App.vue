@@ -20,6 +20,7 @@
             <el-space>
               <el-text type="primary" v-if="!row.active" class="cursor-pointer" @click="handleStart(row)">启动</el-text>
               <el-text type="primary" v-if="row.active" class="cursor-pointer" @click="handleStop(row)">停止</el-text>
+              <el-text type="primary" v-if="row.active" class="cursor-pointer" @click="handleViewLog(row)">查看日志</el-text>
               <el-text type="danger" v-if="!row.active" class="cursor-pointer" @click="handlRemove(row)">删除</el-text>
             </el-space>
           </template>
@@ -28,6 +29,12 @@
     </el-config-provider>
 
     <add-modal ref="addRef"></add-modal>
+
+    <el-dialog v-model="logDialogVisible" title="日志" width="800">
+      <el-scrollbar height="400px">
+        <pre>{{ currentLog }}</pre>
+      </el-scrollbar>
+    </el-dialog>
   </div>
 </template>
 
@@ -115,5 +122,18 @@ const handlRemove = (row: App) => {
       }
     },
   })
+}
+
+const logDialogVisible = ref(false)
+const currentLog = ref('')
+
+const handleViewLog = async (row: App) => {
+  const [err, res] = await try_http<string[]>({
+    url: `/log/${row.name}`,
+  })
+  if (!err) {
+    currentLog.value = res.data.join('\n')
+    logDialogVisible.value = true
+  }
 }
 </script>
