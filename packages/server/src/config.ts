@@ -15,6 +15,24 @@ export class ConfigUtil {
     }
     const configs = parseJson<Config[]>(ls.getItem('config'), [])
     this.configs = configs
+
+    // 注册进程退出时的清理函数
+    process.on('exit', () => this.destroy())
+    process.on('SIGINT', () => {
+      this.destroy()
+      process.exit()
+    })
+    process.on('SIGTERM', () => {
+      this.destroy()
+      process.exit()
+    })
+  }
+
+  destroy() {
+    this.configs.forEach((config) => {
+      config.active = false
+    })
+    this.syncConfig()
   }
 
   syncConfig() {
@@ -51,49 +69,112 @@ export class ConfigUtil {
   }
 
   start(name: string) {
-    const config = this.getConfig(name)
-    config.active = true
-    this.syncConfig()
-    const { command, args, path } = config
-
-    const ls = spawn(command, [args], {
-      cwd: path,
-    })
-
-    this.cache.set(name, ls)
-
-    ls.stdout.on('data', (data) => {
-      if (!this.log.has(name)) {
-        this.log.set(name, [])
+    return new Promise((resolve) => {
+      const config = this.getConfig(name)
+      if (!config) {
+        return resolve({
+          code: 500,
+          msg: `服务${name}不存在`,
+        })
       }
-      const log = this.log.get(name)
-      log.push(data.toString())
-    })
 
-    ls.stderr.on('data', (data) => {
-      console.log("%c Line:74 🍧 data", "color:#3f7cff", data);
-    })
+      if (config.active) {
+        return resolve({
+          code: 500,
+          msg: `服务${name}已启动`,
+        })
+      }
 
-    ls.on('close', (code) => {
-      config.active = false
-      this.cache.delete(name) // Add this line
-      this.syncConfig()
-      console.log(`child process exited with code ${code}`)
+      const { command, args, path } = config
+      let isResolve = false
+
+      const ls = spawn(command, [args], {
+        cwd: path,
+      })
+
+      this.cache.set(name, ls)
+
+      ls.stdout.on('data', (data) => {
+        if (!isResolve) {
+          isResolve = true
+          config.active = true
+          this.syncConfig()
+          resolve({
+            code: 200,
+          })
+        }
+        if (!this.log.has(name)) {
+          this.log.set(name, [])
+        }
+        const log = this.log.get(name)
+        log.push(data.toString())
+      })
+
+      ls.stderr.on('data', (data) => {
+        if (!isResolve) {
+          isResolve = true
+          config.active = false
+          this.syncConfig()
+          resolve({
+            code: 500,
+            msg: data.toString(),
+          })
+        }
+      })
+
+      ls.on('close', (code) => {
+        config.active = false
+        this.cache.delete(name)
+        this.syncConfig()
+      })
     })
   }
 
   stop(name: string) {
-    console.log("%c Line:86 🍢 name", "color:#4fff4B", name);
+    const config = this.getConfig(name)
+    if (!config) {
+      return {
+        code: 500,
+        msg: `服务${name}不存在`,
+      }
+    }
+    if (!config.active) {
+      return {
+        code: 500,
+        msg: `服务${name}未启动`,
+      }
+    }
     const ls = this.cache.get(name)
     if (ls) {
       const res = ls.kill()
-      console.log("%c Line:89 🥝 res", "color:#93c0a4", res);
       if (res) {
-        const config = this.getConfig(name)
         config.active = false
         this.cache.delete(name)
         this.log.delete(name)
         this.syncConfig()
+        return {
+          code: 200,
+          msg: 'ok',
+        }
+      } else {
+        return {
+          code: 500,
+          msg: `服务${name}停止失败`,
+        }
+      }
+    } else {
+      // 如果ls不存在，但config.active为true，说明进程已意外终止，直接将active设为false
+      if (config.active) {
+        config.active = false
+        this.syncConfig()
+        return {
+          code: 200,
+          msg: `服务${name}进程已意外终止，已更新状态`,
+        }
+      }
+      return {
+        code: 500,
+        msg: `服务${name}进程不存在`,
       }
     }
   }

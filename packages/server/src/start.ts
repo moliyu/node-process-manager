@@ -18,24 +18,16 @@ export const monitor = (router: Router) => {
 
   router.post('/start', async (ctx) => {
     const name = ctx.request.body.name
-    configUtil.start(name)
-    ctx.body = {
-      code: 200,
-      msg: 'ok',
-    }
+    ctx.body = await configUtil.start(name)
   })
 
   router.post('/stop', async (ctx) => {
     const name = ctx.request.body.name
-    configUtil.stop(name)
-    ctx.body = {
-      code: 200,
-      msg: 'ok',
-    }
+    ctx.body = configUtil.stop(name)
   })
 
   router.post('/delete', (ctx) => {
-    console.log("%c Line:38 🍒 ctx", "color:#ffdd4d", ctx);
+    console.log('%c Line:38 🍒 ctx', 'color:#ffdd4d', ctx)
     ctx.body = configUtil.remove(ctx.request.body.name)
   })
 
