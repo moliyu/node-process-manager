@@ -127,6 +127,13 @@ export class ConfigUtil {
         this.cache.delete(name)
         this.syncConfig()
       })
+
+      ls.on('error', (err) => {
+        resolve({
+          code: 500,
+          msg: '命令执行错误',
+        })
+      })
     })
   }
 
@@ -196,6 +203,15 @@ export class ConfigUtil {
     this.cache.delete(name)
     this.log.delete(name)
     this.syncConfig()
+    return {
+      code: 200,
+      msg: 'ok',
+    }
+  }
+
+  modify(name: string, config: Config) {
+    const _config = this.configMap[name]
+    Object.assign(_config, config)
     return {
       code: 200,
       msg: 'ok',

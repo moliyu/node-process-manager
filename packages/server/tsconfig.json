@@ -3,9 +3,11 @@
     "module": "esNext",
     "target": "esNext",
     "moduleResolution": "node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "outDir": "dist/server"
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "tsdown.config.ts"
   ]
 }

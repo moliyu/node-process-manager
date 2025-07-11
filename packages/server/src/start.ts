@@ -27,7 +27,6 @@ export const monitor = (router: Router) => {
   })
 
   router.post('/delete', (ctx) => {
-    console.log('%c Line:38 🍒 ctx', 'color:#ffdd4d', ctx)
     ctx.body = configUtil.remove(ctx.request.body.name)
   })
 
@@ -38,5 +37,11 @@ export const monitor = (router: Router) => {
       code: 200,
       data: log,
     }
+  })
+
+  router.post('/modify/:name', (ctx) => {
+    const name = ctx.params.name
+    const config = ctx.request.body
+    ctx.body = configUtil.modify(name, config)
   })
 }

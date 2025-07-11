@@ -15,12 +15,15 @@
           </template>
         </el-table-column>
         <el-table-column label="参数" prop="args"></el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column label="操作" width="140">
           <template #default="{ row }">
             <el-space>
               <el-text type="primary" v-if="!row.active" class="cursor-pointer" @click="handleStart(row)">启动</el-text>
               <el-text type="primary" v-if="row.active" class="cursor-pointer" @click="handleStop(row)">停止</el-text>
-              <el-text type="primary" v-if="row.active" class="cursor-pointer" @click="handleViewLog(row)">查看日志</el-text>
+              <el-text type="primary" v-if="row.active" class="cursor-pointer" @click="handleViewLog(row)">
+                查看日志
+              </el-text>
+              <el-text type="warning" v-if="!row.active" class="cursor-pointer" @click="handleEdit(row)">编辑</el-text>
               <el-text type="danger" v-if="!row.active" class="cursor-pointer" @click="handlRemove(row)">删除</el-text>
             </el-space>
           </template>
@@ -135,5 +138,11 @@ const handleViewLog = async (row: App) => {
     currentLog.value = res.data.join('\n')
     logDialogVisible.value = true
   }
+}
+
+const handleEdit = async (row: App) => {
+  await addRef.value?.edit(row)
+  ElMessage.success('操作成功')
+  fetchData()
 }
 </script>
