@@ -101,6 +101,9 @@ export class ConfigUtil {
             code: 200,
           })
         }
+        if (!this.log.has(name)) {
+          this.log.set(name, [])
+        }
         const log = this.log.get(name)
         log.push(data.toString())
       })
