@@ -15,14 +15,12 @@
           </template>
         </el-table-column>
         <el-table-column label="参数" prop="args"></el-table-column>
-        <el-table-column label="操作" width="140">
+        <el-table-column label="操作" width="200">
           <template #default="{ row }">
             <el-space>
               <el-text type="primary" v-if="!row.active" class="cursor-pointer" @click="handleStart(row)">启动</el-text>
               <el-text type="primary" v-if="row.active" class="cursor-pointer" @click="handleStop(row)">停止</el-text>
-              <el-text type="primary" v-if="row.active" class="cursor-pointer" @click="handleViewLog(row)">
-                查看日志
-              </el-text>
+              <el-text type="primary" class="cursor-pointer" @click="handleViewLog(row)">日志</el-text>
               <el-text type="warning" v-if="!row.active" class="cursor-pointer" @click="handleEdit(row)">编辑</el-text>
               <el-text type="danger" v-if="!row.active" class="cursor-pointer" @click="handlRemove(row)">删除</el-text>
             </el-space>

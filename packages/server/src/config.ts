@@ -55,13 +55,10 @@ export class ConfigUtil {
   }
 
   get configMap() {
-    return this.configs.reduce(
-      (res, item) => {
-        res[item.name] = item
-        return res
-      },
-      {} as Record<string, Config>,
-    )
+    return this.configs.reduce((res, item) => {
+      res[item.name] = item
+      return res
+    }, {} as Record<string, Config>)
   }
 
   getConfig(name: string) {
@@ -88,11 +85,12 @@ export class ConfigUtil {
       const { command, args, path } = config
       let isResolve = false
 
-      const ls = spawn(command, [args], {
+      const ls = spawn(command, args ? args.split(' ') : [], {
         cwd: path,
       })
 
       this.cache.set(name, ls)
+      this.log.set(name, [])
 
       ls.stdout.on('data', (data) => {
         if (!isResolve) {
@@ -102,9 +100,6 @@ export class ConfigUtil {
           resolve({
             code: 200,
           })
-        }
-        if (!this.log.has(name)) {
-          this.log.set(name, [])
         }
         const log = this.log.get(name)
         log.push(data.toString())
