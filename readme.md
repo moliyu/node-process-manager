@@ -13,5 +13,5 @@ npm install @moliyu/process-monitor -g
 2. run with `monitor`, and visited `loalhost:4000`
 
 ### screenshots
+<img width="2524" height="1026" alt="image" src="https://github.com/user-attachments/assets/7fd87e86-55cc-4075-b2d6-ffb9c2792e4f" />
 
-![image-20250711155124424](./assets/image-20250711155124424.png)
