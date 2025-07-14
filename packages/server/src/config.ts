@@ -2,6 +2,7 @@ import { Config } from './type'
 import st from 'node-localstorage'
 import { parseJson } from './utils'
 import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process'
+import kill from 'tree-kill'
 
 const ls = new st.LocalStorage('./local')
 
@@ -136,52 +137,56 @@ export class ConfigUtil {
   }
 
   stop(name: string) {
-    const config = this.getConfig(name)
-    if (!config) {
-      return {
-        code: 500,
-        msg: `服务${name}不存在`,
-      }
-    }
-    if (!config.active) {
-      return {
-        code: 500,
-        msg: `服务${name}未启动`,
-      }
-    }
-    const ls = this.cache.get(name)
-    if (ls) {
-      const res = ls.kill('SIGINT')
-      if (res) {
-        config.active = false
-        this.cache.delete(name)
-        this.log.delete(name)
-        this.syncConfig()
-        return {
-          code: 200,
-          msg: 'ok',
-        }
-      } else {
-        return {
+    return new Promise((resolve) => {
+      const config = this.getConfig(name)
+      if (!config) {
+        resolve({
           code: 500,
-          msg: `服务${name}停止失败`,
+          msg: `服务${name}不存在`,
+        })
+      }
+      if (!config.active) {
+        resolve({
+          code: 500,
+          msg: `服务${name}未启动`,
+        })
+      }
+      const ls = this.cache.get(name)
+      if (ls) {
+        kill(ls.pid, 'SIGINT', (err) => {
+          if (err) {
+            resolve({
+              code: 500,
+              msg: `服务${name}停止失败`,
+            })
+          } else {
+            config.active = false
+            this.cache.delete(name)
+            this.log.delete(name)
+            this.syncConfig()
+            resolve({
+              code: 200,
+              msg: 'ok',
+            })
+          }
+        })
+      } else {
+        // 如果ls不存在，但config.active为true，说明进程已意外终止，直接将active设为false
+        if (config.active) {
+          config.active = false
+          this.syncConfig()
+          resolve({
+            code: 200,
+            msg: `服务${name}进程已意外终止，已更新状态`,
+          })
+        } else {
+          resolve({
+            code: 500,
+            msg: `服务${name}进程不存在`,
+          })
         }
       }
-    } else {
-      // 如果ls不存在，但config.active为true，说明进程已意外终止，直接将active设为false
-      if (config.active) {
-        config.active = false
-        this.syncConfig()
-        return {
-          code: 200,
-          msg: `服务${name}进程已意外终止，已更新状态`,
-        }
-      }
-      return {
-        code: 500,
-        msg: `服务${name}进程不存在`,
-      }
-    }
+    })
   }
 
   restart(name: string) {
