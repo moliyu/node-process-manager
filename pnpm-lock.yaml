@@ -85,6 +85,9 @@ importers:
       node-localstorage:
         specifier: ^3.0.5
         version: 3.0.5
+      tree-kill:
+        specifier: ^1.2.2
+        version: 1.2.2
     devDependencies:
       '@types/koa':
         specifier: ^2.15.0
@@ -3224,6 +3227,11 @@ packages:
   /totalist@3.0.1:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
+    dev: false
+
+  /tree-kill@1.2.2:
+    resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
+    hasBin: true
     dev: false
 
   /tsdown@0.12.9(typescript@5.8.3):

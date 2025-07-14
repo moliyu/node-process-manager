@@ -23,7 +23,7 @@ export const monitor = (router: Router) => {
 
   router.post('/stop', async (ctx) => {
     const name = ctx.request.body.name
-    ctx.body = configUtil.stop(name)
+    ctx.body = await configUtil.stop(name)
   })
 
   router.post('/delete', (ctx) => {
