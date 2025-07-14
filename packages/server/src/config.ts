@@ -151,7 +151,7 @@ export class ConfigUtil {
     }
     const ls = this.cache.get(name)
     if (ls) {
-      const res = ls.kill()
+      const res = ls.kill('SIGINT')
       if (res) {
         config.active = false
         this.cache.delete(name)
