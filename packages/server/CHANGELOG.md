@@ -1,5 +1,11 @@
 # @moliyu/process-monitor
 
+## 2.0.3
+
+### Patch Changes
+
+- 4e1ccef: use tree-kill fix exit
+
 ## 2.0.2
 
 ### Patch Changes
